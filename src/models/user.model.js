@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const mongoosePaginate = require('mongoose-paginate');
+const uniqueValidator = require('mongoose-unique-validator');
 const AbstractModel = require('./abstract.model');
 const Constants = require('../constants');
 
@@ -12,7 +13,8 @@ class User extends AbstractModel {
 			name: {
 				type: String,
 				trim: true,
-				required: true
+				required: true,
+				unique: true
 			},
 			role: {
 				type: String,
@@ -24,6 +26,7 @@ class User extends AbstractModel {
 			}
 		});
 
+		this.schema.plugin(uniqueValidator, {message: Constants.ERROR_UNIQUE});
 		this.schema.plugin(mongoosePaginate);
 	}
 }

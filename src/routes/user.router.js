@@ -1,4 +1,5 @@
-const API_USERS_LIST = '/api/users';
+const API_USERS_LIST = '/api/1.0/users';
+const API_USER = '/api/1.0/user';
 const LIST_PAGE_SIZE = 20;
 
 const Router = require('./abstract.router');
@@ -10,10 +11,9 @@ class UsersRouter extends Router {
 	configure () {
 
 		/**
-		 * @api {get} /api/users Get list of users
+		 * @api {get} /api/1.0/users Get list of users
 		 * @apiName GetUser
 		 * @apiGroup User
-		 * @apiPermission ADMIN
 		 * @apiVersion 1.0.0
 		 *
 		 * @apiDescription
@@ -23,6 +23,20 @@ class UsersRouter extends Router {
 		 * @apiParam {Object} [sort] db sort
 		 */
 		this.bindGET(API_USERS_LIST, this.routeUsers, {
+			auth: false,
+			restrict: Constants.ROLES.ADMIN
+		});
+
+		/**
+		 * @api {post} /api/1.0/user Create a user
+		 * @apiName AddUser
+		 * @apiGroup User
+		 * @apiVersion 1.0.0
+		 *
+		 * @apiDescription
+		 * For testing purposes only
+		 */
+		this.bindPOST(API_USER, this.routeAddUser, {
 			auth: false,
 			restrict: Constants.ROLES.ADMIN
 		});
@@ -55,6 +69,23 @@ class UsersRouter extends Router {
 			});
 	}
 
+	routeAddUser (req, res, next) {
+		const user = new this._models.User({
+			name: Router.filter(req.params.name),
+			role: parseInt(req.params.role, 10) || Constants.ROLES.USER
+		});
+
+		user.save(function (err, createdUser) {
+			if (err) {
+				Router.fail(res, err);
+				return next();
+			}
+			else {
+				Router.success(res, createdUser);
+				return next();
+			}
+		});
+	}
 }
 
 module.exports = UsersRouter;

@@ -5,7 +5,7 @@ const Database = require('../database');
 const Constants = require('../constants');
 
 const RE_FILTER = /[^a-zA-Z0-9\s#_\-\)\(\.]+/g;
-const RE_PRETTIFY_ERROR = /\(?`?\{(PATH|VALUE)}`?\)?\s?/g;
+const RE_PRETTIFY_ERROR = /\(?`?\{(PATH|VALUE)}`?\)?/ig;
 const DEFAULT_ROUTE_OPTIONS = {
 	auth: false
 };
@@ -94,9 +94,9 @@ class Router {
 			const errors = {};
 
 			for (let fieldName of Object.keys(data.errors)) {
-				errors[fieldName] = data.errors[fieldName].properties.message.replace(RE_PRETTIFY_ERROR, '');
+				errors[fieldName] = data.errors[fieldName].properties.message.replace(RE_PRETTIFY_ERROR, fieldName);
 			}
-
+			logger.error(data);
 			data = {message: errors};
 		}
 
