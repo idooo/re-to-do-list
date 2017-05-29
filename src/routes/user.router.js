@@ -75,7 +75,7 @@ class UsersRouter extends Router {
 			role: parseInt(req.params.role, 10) || Constants.ROLES.USER
 		});
 
-		user.save(function (err, createdUser) {
+		user.save((err, createdUser) => {
 			if (err) {
 				Router.fail(res, err);
 				return next();
