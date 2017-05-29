@@ -1,9 +1,17 @@
 {
-  "logs": {
-    "level": "debug"
-  },
-  "server": {
-    "port": 8080,
-    "host": "0.0.0.0"
-  }
+	"logs": {
+		"level": "debug"
+	},
+	"server": {
+		"port": 8080,
+		"host": "0.0.0.0"
+	},
+	"database": {
+		"uri": "11111.mlab.com:11111",
+		"port": 11111,
+		"db": "test",
+		"username": "test",
+		"password": "test",
+		"autoConnect": true
+	}
 }

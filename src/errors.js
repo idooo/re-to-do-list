@@ -23,6 +23,9 @@ class ExtendableError extends Error {
 
 class ConfigurationParseError extends ExtendableError {}
 
+class DatabaseConnectionError extends ExtendableError {}
+
 module.exports = {
-	ConfigurationParseError
+	ConfigurationParseError,
+	DatabaseConnectionError
 };

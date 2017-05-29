@@ -1,17 +1,14 @@
-const logger = require('winston');
 const ResponseHelper = require('../helpers/response');
+const Router = require('./abstract.router');
+
 const FIELDS_TO_MASK = [
-	'accessKeyId',
-	'secretAccessKey',
 	'password',
-	'accountId',
-	'apiKey'
+	'database'
 ];
 
-class StatusRouter {
+class StatusRouter extends Router {
 
-	constructor (app) {
-		this._config = app.config;
+	configure () {
 
 		/**
 		 * @api {get} /api/status Status
@@ -19,12 +16,10 @@ class StatusRouter {
 		 * @apiGroup Information
 		 * @apiVersion 1.0.0
 		 */
-		app.server.get('/api/status', this.status.bind(this));
-
-		logger.debug('StatusRouter has been loaded');
+		this.bindGET('/api/status', this.routeStatus);
 	}
 
-	status (req, res) {
+	routeStatus (req, res) {
 		const sanitisedConfig = ResponseHelper.maskFields(JSON.parse(JSON.stringify(this._config)), FIELDS_TO_MASK);
 		ResponseHelper.success(res, {
 			status: 'ok',

@@ -3,6 +3,9 @@ const path = require('path');
 const fs = require('fs');
 const tv4 = require('tv4');
 const restify = require('restify');
+
+const Database = require('./database');
+const RouterLoader = require('./router');
 const {ConfigurationParseError} = require('./errors');
 
 const ROUTERS_PATH = `${__dirname}/routes`;
@@ -37,8 +40,13 @@ class Application {
 		this._server = restify.createServer({});
 		this.setupWebServer();
 
+		// Connect to DB and load model
+		const db = new Database(this._config.database);
+		this._model = db.loadModel();
+
 		// Routing
-		this.loadRouters(ROUTERS_PATH);
+		new RouterLoader(this._server, this._config).loadRouters();
+
 	}
 
 	get server () {
@@ -47,6 +55,10 @@ class Application {
 
 	get config () {
 		return this._config;
+	}
+
+	get model () {
+		return this._model;
 	}
 
 	/**
@@ -62,18 +74,6 @@ class Application {
 			this._config.server.host || 'localhost',
 			() => this._logger.info('Server is listening at %s', this._server.url)
 		);
-	}
-
-	/**
-	 * @description
-	 * Loads and inits routers from the specified path
-	 *
-	 * @param {String} routersPath
-	 */
-	loadRouters (routersPath) {
-		fs.readdirSync(routersPath)
-			.filter(filename => /.*\.router\.js/.test(filename))
-			.forEach(filename => new (require(`${ROUTERS_PATH}/${filename}`))(this));
 	}
 
 	setupWebServer () {

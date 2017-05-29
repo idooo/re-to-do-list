@@ -91,6 +91,7 @@ typings/
 
 # mpeltonen/sbt-idea plugin
 .idea_modules/
+.idea/
 
 # JIRA plugin
 atlassian-ide-plugin.xml
@@ -101,3 +102,4 @@ crashlytics.properties
 crashlytics-build.properties
 fabric.properties
 
+/config/local.json
