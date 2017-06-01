@@ -14,6 +14,8 @@
     "mongoose": "^4.10.3",
     "mongoose-paginate": "^5.0.3",
     "mongoose-unique-validator": "^1.0.5",
+    "mongoose-uuid2": "^2.0.1",
+    "node-uuid": "^1.4.8",
     "restify": "^4.3.0",
     "tv4": "^1.3.0",
     "winston": "^2.3.1",
