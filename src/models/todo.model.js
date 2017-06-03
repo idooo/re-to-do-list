@@ -9,7 +9,7 @@ const AbstractModel = require('./abstract.model');
 const Constants = require('../constants');
 
 
-class User extends AbstractModel {
+class ToDoItem extends AbstractModel {
 
 	constructor () {
 		super();
@@ -21,8 +21,9 @@ class User extends AbstractModel {
 			},
 			status: {
 				type: String,
-				default: Constants.ROLES.USER,
-				enum: Object.keys(Constants.TODO_TYPES)
+				default: Constants.TODO_TYPES.OPEN,
+				enum: Object.keys(Constants.TODO_TYPES),
+				required: true
 			},
 			uuid: {
 				type: mongoose.Types.UUID,
@@ -30,7 +31,11 @@ class User extends AbstractModel {
 			},
 			author: {
 				type: mongoose.Schema.Types.ObjectId,
-				required: true
+				required: false // @todo required
+			},
+			dateDelta: {
+				type: Number,
+				default: 0
 			},
 			creationDate: {
 				type: Date,
@@ -42,4 +47,4 @@ class User extends AbstractModel {
 	}
 }
 
-module.exports = User;
+module.exports = ToDoItem;

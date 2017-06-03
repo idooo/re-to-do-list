@@ -93,9 +93,13 @@ class Router {
 		else if (data.name === 'ValidationError') {
 			const errors = {};
 
-			for (let fieldName of Object.keys(data.errors)) {
-				errors[fieldName] = data.errors[fieldName].properties.message.replace(RE_PRETTIFY_ERROR, fieldName);
-			}
+			// @todo: fix error messages
+			errors.fields = Object.keys(data.errors);
+            //
+			// for (let fieldName of Object.keys(data.errors)) {
+			// 	console.log(data.errors)
+			// 	errors[fieldName] = data.errors[fieldName].properties.message.replace(RE_PRETTIFY_ERROR, fieldName);
+			// }
 			logger.error(data);
 			data = {message: errors};
 		}

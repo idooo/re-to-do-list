@@ -23,7 +23,7 @@ module.exports = {
 
 	TODO_TYPES: {
 		DONE: 'DONE',
-		CLOSED: 'CLOSED',
+		OPEN: 'OPEN',
 		ABANDON: 'ABANDON',
 		IN_PROGRESS: 'IN_PROGRESS'
 	},
