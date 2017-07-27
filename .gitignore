@@ -93,6 +93,8 @@ typings/
 .idea_modules/
 .idea/
 
+dist
+
 # JIRA plugin
 atlassian-ide-plugin.xml
 

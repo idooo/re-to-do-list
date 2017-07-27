@@ -21,11 +21,7 @@ class ExtendableError extends Error {
  * List of custom errors
  */
 
-class ConfigurationParseError extends ExtendableError {}
+export class ConfigurationParseError extends ExtendableError {}
 
-class DatabaseConnectionError extends ExtendableError {}
+export class DatabaseConnectionError extends ExtendableError {}
 
-module.exports = {
-	ConfigurationParseError,
-	DatabaseConnectionError
-};

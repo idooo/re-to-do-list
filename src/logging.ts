@@ -1,5 +1,4 @@
-const winston = require('winston');
-
+import * as winston from 'winston';
 
 /**
  * @description
@@ -8,12 +7,12 @@ const winston = require('winston');
  * @param {Object} config
  * @return {Object}
  */
-module.exports = function Logger (config) {
+export function LoggerInitialisation (config: IConfig) {
 
 	// Default file logger settings
 	const filenameLoggerSettings = {
 		level: (config.logs || {}).level,
-		json: !!(config.logs || {}).isJson,
+		json: (config.logs || {}).isJson,
 		filename: (config.logs || {}).file || `${__dirname}/../tmp/server.log`
 	};
 
@@ -23,7 +22,7 @@ module.exports = function Logger (config) {
 		timestamp,
 		level: (config.logs || {}).level,
 		colorize: true,
-		formatter (options) {
+		formatter (options: IFormatterOptions) {
 			return winston.config.colorize(options.level, (options.level.toUpperCase() + '  ').slice(0, 5))
 				+ ': ' + this.timestamp() + ' - ' + options.message + getMeta(options);
 		}
@@ -36,14 +35,14 @@ module.exports = function Logger (config) {
 	else {
 		winston.add(winston.transports.File, Object.assign({}, filenameLoggerSettings, {
 			timestamp,
-			formatter (options) {
+			formatter (options: IFormatterOptions) {
 				return this.timestamp() + ' - ' + (options.level.toUpperCase() + '  ').slice(0, 5)
 					+ ' [process ' + process.pid + '] - ' + options.message + getMeta(options);
 			}
 		}));
 	}
 
-	function getMeta (options = {}) {
+	function getMeta (options: IFormatterOptions) {
 		if (Object.keys(options.meta || {}).length) {
 			if (options.meta.stack) {
 				return (options.message ? ' - ' : '') + options.meta.stack;

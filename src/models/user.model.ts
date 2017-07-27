@@ -1,11 +1,10 @@
 const mongoose = require('mongoose');
 const mongoosePaginate = require('mongoose-paginate');
 const uniqueValidator = require('mongoose-unique-validator');
-const AbstractModel = require('./abstract.model');
-const Constants = require('../constants');
+import {AbstractModel} from './abstract.model'
 
 
-class User extends AbstractModel {
+export class User extends AbstractModel {
 
 	constructor () {
 		super();
@@ -18,7 +17,7 @@ class User extends AbstractModel {
 			},
 			role: {
 				type: String,
-				default: Constants.ROLES.USER
+				default: 2
 			},
 			creationDate: {
 				type: Date,
@@ -26,9 +25,8 @@ class User extends AbstractModel {
 			}
 		});
 
-		this.schema.plugin(uniqueValidator, {message: Constants.ERROR_UNIQUE});
+		this.schema.plugin(uniqueValidator, {message: 'ERROR'});
 		this.schema.plugin(mongoosePaginate);
 	}
 }
 
-module.exports = User;

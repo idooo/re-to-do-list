@@ -5,11 +5,16 @@ const uuid = require('node-uuid');
 // Will add the UUID type to the Mongoose Schema types
 require('mongoose-uuid2')(mongoose);
 
-const AbstractModel = require('./abstract.model');
-const Constants = require('../constants');
+import {AbstractModel} from './abstract.model';
 
+const TODO_TYPES = {
+	DONE: 'DONE',
+	OPEN: 'OPEN',
+	ABANDON: 'ABANDON',
+	IN_PROGRESS: 'IN_PROGRESS'
+}
 
-class ToDoItem extends AbstractModel {
+export class ToDoItem extends AbstractModel {
 
 	constructor () {
 		super();
@@ -21,8 +26,8 @@ class ToDoItem extends AbstractModel {
 			},
 			status: {
 				type: String,
-				default: Constants.TODO_TYPES.OPEN,
-				enum: Object.keys(Constants.TODO_TYPES),
+				default: TODO_TYPES.OPEN,
+				enum: Object.keys(TODO_TYPES),
 				required: true
 			},
 			uuid: {
@@ -46,5 +51,3 @@ class ToDoItem extends AbstractModel {
 		this.schema.plugin(mongoosePaginate);
 	}
 }
-
-module.exports = ToDoItem;
