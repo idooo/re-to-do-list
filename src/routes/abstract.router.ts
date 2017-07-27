@@ -1,11 +1,10 @@
-import {Request, Response} from 'restify'
+import { Request, Response } from 'restify';
 import * as logger from 'winston';
-import {Database} from "../database";
+import { Database } from '../database';
 
 const RE_FILTER = /[^a-zA-Z0-9\s#_\-\)\(\.]+/g;
 
 export class AbstractRouter {
-
 	public model: any = Database.model;
 
 	/**
@@ -13,7 +12,7 @@ export class AbstractRouter {
 	 * @param {Object} res response object
 	 * @param {Object} [data] content to return
 	 */
-	success (res: Response, data: any = {}) {
+	success(res: Response, data: any = {}) {
 		data.status = 'ok';
 		res.send(200, data);
 	}
@@ -24,7 +23,7 @@ export class AbstractRouter {
 	 * @param {Object} [data] content to return
 	 * @param {Number} [code=400] error code
 	 */
-	fail (res: Response, data: any = {}, code: Number = 400) {
+	fail(res: Response, data: any = {}, code: Number = 400) {
 		data.status = 'error';
 		data.code = code;
 		res.send(code, data);
@@ -35,11 +34,10 @@ export class AbstractRouter {
 	 * @param {Object} req request object
 	 * @returns {{}}
 	 */
-	static body (req) {
+	static body(req) {
 		try {
 			return JSON.parse(req.body);
-		}
-		catch (e) {
+		} catch (e) {
 			return {};
 		}
 	}
@@ -50,10 +48,11 @@ export class AbstractRouter {
 	 * @param {String} str
 	 * @returns {*}
 	 */
-	static filter (str) {
+	static filter(str) {
 		if (str === null || str === undefined) return null;
-		return (str.toString() || '').trim().replace(RE_FILTER, '').replace(/(\s+|\t+)/g, ' ');
+		return (str.toString() || '')
+			.trim()
+			.replace(RE_FILTER, '')
+			.replace(/(\s+|\t+)/g, ' ');
 	}
-
 }
-

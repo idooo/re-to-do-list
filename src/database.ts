@@ -1,30 +1,29 @@
 import * as logger from 'winston';
-import {ToDoItem} from "./models/todo.model";
-import {User} from "./models/user.model";
+import { ToDoItem } from './models/todo.model';
+import { User } from './models/user.model';
 
 const mongoose = require('mongoose');
 
-const {DatabaseConnectionError} = require('./errors');
+const { DatabaseConnectionError } = require('./errors');
 
 let instance = null;
 
 /** singleton */
 export class Database {
-
 	private isConnected: boolean = false;
 	public static model = {};
 
-	constructor (private config: IDatabaseConfig) {
+	constructor(private config: IDatabaseConfig) {
 		if (instance) return instance;
 		instance = this;
 
 		this.connect();
 	}
 
-	connect () {
+	connect() {
 		const options = {
-			db: {native_parser: true},
-			server: {poolSize: 5}
+			db: { native_parser: true },
+			server: { poolSize: 5 }
 		};
 
 		if (this.config && this.config.username) {
@@ -33,7 +32,10 @@ export class Database {
 			options['pass'] = this.config.password;
 		}
 
-		mongoose.connect(`${this.config.uri}:${this.config.port}/${this.config.db}`, options);
+		mongoose.connect(
+			`${this.config.uri}:${this.config.port}/${this.config.db}`,
+			options
+		);
 
 		mongoose.connection
 			.on('error', err => {
@@ -48,42 +50,45 @@ export class Database {
 		this.loadModel();
 	}
 
-	loadModel () {
+	loadModel() {
 		// load models
 		const models = {
-			'ToDoItem': ToDoItem,
-			'User': User
+			ToDoItem: ToDoItem,
+			User: User
 		};
 
 		for (let modelName in models) {
-			const schemaDefinition = new models[modelName];
-			Database.model[schemaDefinition.name] = mongoose.model(schemaDefinition.name, schemaDefinition.schema);
+			const schemaDefinition = new models[modelName]();
+			Database.model[schemaDefinition.name] = mongoose.model(
+				schemaDefinition.name,
+				schemaDefinition.schema
+			);
 		}
-
 	}
 
-	disconnect (callback) {
-		mongoose.disconnect(function (err, value) {
+	disconnect(callback) {
+		mongoose.disconnect(function(err, value) {
 			if (typeof callback === 'function') callback(err, value);
 			logger.info('Database connection was closed');
 		});
 	}
 
-	clean () {
+	clean() {
 		Object.keys(Database.model).forEach(modelName => {
 			if (typeof Database.model[modelName].remove === 'undefined') return;
-			Database[modelName].remove({}, () => logger.warn(modelName + ' collection was removed'));
+			Database[modelName].remove({}, () =>
+				logger.warn(modelName + ' collection was removed')
+			);
 		});
 	}
 
-	static ObjectId (id) {
+	static ObjectId(id) {
 		let value = null;
 		if (!mongoose.Types.ObjectId.isValid(id)) return value;
 
 		try {
 			value = mongoose.Types.ObjectId(id);
-		}
-		catch (e) {
+		} catch (e) {
 			// nothing
 		}
 		return value;

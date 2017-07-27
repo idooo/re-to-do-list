@@ -1,18 +1,16 @@
-import * as restify from 'restify'
-import * as assert from "assert";
-import * as fs from "fs";
-import {Winston} from "winston";
+import * as restify from 'restify';
+import * as assert from 'assert';
+import * as fs from 'fs';
 import * as corsMiddleware from 'restify-cors-middleware';
+import { Winston } from 'winston';
 
-import {LoggerInitialisation} from './logging';
-import {Database} from "./database";
-import {StatusRouter} from "./routes/status.router";
-import {UserRouter} from "./routes/users.router";
-import {ToDoListRouter} from "./routes/todolist.router";
-
+import { LoggerInitialisation } from './logging';
+import { Database } from './database';
+import { StatusRouter } from './routes/status.router';
+import { UserRouter } from './routes/users.router';
+import { ToDoListRouter } from './routes/todolist.router';
 
 export class Application {
-
 	private config: IConfig;
 	private logger: Winston;
 	private server: restify.Server;
@@ -21,14 +19,20 @@ export class Application {
 	/**
 	 * @param {String} configName
 	 */
-	constructor (configName: string) {
-		assert(configName, 'configName (type String) parameter must be passed to Application constructor');
+	constructor(configName: string) {
+		assert(
+			configName,
+			'configName (type String) parameter must be passed to Application constructor'
+		);
 		try {
 			this.config = JSON.parse(fs.readFileSync(configName).toString());
 			this.config.debug = this.config.debug || {};
-		}
-		catch (ex) {
-			console.error(`Error! Cannot find config file '${process.env.config}'. Existing now...`, ex);
+		} catch (ex) {
+			console.error(
+				`Error! Cannot find config file '${process.env
+					.config}'. Existing now...`,
+				ex
+			);
 			process.exit(1);
 		}
 
@@ -36,8 +40,12 @@ export class Application {
 		Object.freeze(this.config);
 
 		if (Object.keys(this.config.debug).length) {
-			this.logger.warn('One or more debug options enabled! Don\'t do it in production please!');
-			Object.keys(this.config.debug).forEach(key => this.logger.warn(`${key} debug option enabled`));
+			this.logger.warn(
+				"One or more debug options enabled! Don't do it in production please!"
+			);
+			Object.keys(this.config.debug).forEach(key =>
+				this.logger.warn(`${key} debug option enabled`)
+			);
 		}
 
 		// Web server
@@ -53,8 +61,7 @@ export class Application {
 		new ToDoListRouter(this.server);
 	}
 
-
-	start () {
+	start() {
 		this.logger.debug('Server has been started');
 
 		this.server.listen(
@@ -64,41 +71,45 @@ export class Application {
 		);
 	}
 
-	setupWebServer () {
+	setupWebServer() {
 		// Setup server
-		this.server.use(restify.plugins.bodyParser({mapParams: true}));
+		this.server.use(restify.plugins.bodyParser({ mapParams: true }));
 		this.server.use(restify.plugins.queryParser());
 
 		// Global uncaughtException Error Handler
-		this.server.on('uncaughtException', (
-			req: restify.Response,
-			res: restify.Response,
-			route: Object,
-			error: Error
-		) => {
-			this.logger.warn('uncaughtException', route, error.stack.toString());
+		this.server.on(
+			'uncaughtException',
+			(
+				req: restify.Response,
+				res: restify.Response,
+				route: Object,
+				error: Error
+			) => {
+				this.logger.warn('uncaughtException', route, error.stack.toString());
 
-			res.send(500, {
-				error: 'INTERNAL_ERROR',
-				status: 'error'
-			});
-		});
-
-		this.server.use((req: restify.Request, res: restify.Response, next: restify.Next) => {
-			// Add debug logger for /api/ endpoints
-			if (/\/api\/.*/.test(req.url)) {
-				this.logger.debug(`${req.method} ${req.url}`);
+				res.send(500, {
+					error: 'INTERNAL_ERROR',
+					status: 'error'
+				});
 			}
+		);
 
-			return next();
-		});
+		this.server.use(
+			(req: restify.Request, res: restify.Response, next: restify.Next) => {
+				// Add debug logger for /api/ endpoints
+				if (/\/api\/.*/.test(req.url)) {
+					this.logger.debug(`${req.method} ${req.url}`);
+				}
+
+				return next();
+			}
+		);
 
 		const cors = corsMiddleware({
-			origins: ['http://localhost:*'],
+			origins: ['http://localhost:*']
 		});
 
 		this.server.pre(cors.preflight);
 		this.server.use(cors.actual);
 	}
 }
-

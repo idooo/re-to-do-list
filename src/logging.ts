@@ -7,8 +7,7 @@ import * as winston from 'winston';
  * @param {Object} config
  * @return {Object}
  */
-export function LoggerInitialisation (config: IConfig) {
-
+export function LoggerInitialisation(config: IConfig) {
 	// Default file logger settings
 	const filenameLoggerSettings = {
 		level: (config.logs || {}).level,
@@ -22,27 +21,46 @@ export function LoggerInitialisation (config: IConfig) {
 		timestamp,
 		level: (config.logs || {}).level,
 		colorize: true,
-		formatter (options: IFormatterOptions) {
-			return winston.config.colorize(options.level, (options.level.toUpperCase() + '  ').slice(0, 5))
-				+ ': ' + this.timestamp() + ' - ' + options.message + getMeta(options);
+		formatter(options: IFormatterOptions) {
+			return (
+				winston.config.colorize(
+					options.level,
+					(options.level.toUpperCase() + '  ').slice(0, 5)
+				) +
+				': ' +
+				this.timestamp() +
+				' - ' +
+				options.message +
+				getMeta(options)
+			);
 		}
 	});
 
 	// Pick one of the two logging outputs (JSON or plain file)
 	if ((config.logs || {}).isJson) {
 		winston.add(winston.transports.File, filenameLoggerSettings);
-	}
-	else {
-		winston.add(winston.transports.File, Object.assign({}, filenameLoggerSettings, {
-			timestamp,
-			formatter (options: IFormatterOptions) {
-				return this.timestamp() + ' - ' + (options.level.toUpperCase() + '  ').slice(0, 5)
-					+ ' [process ' + process.pid + '] - ' + options.message + getMeta(options);
-			}
-		}));
+	} else {
+		winston.add(
+			winston.transports.File,
+			Object.assign({}, filenameLoggerSettings, {
+				timestamp,
+				formatter(options: IFormatterOptions) {
+					return (
+						this.timestamp() +
+						' - ' +
+						(options.level.toUpperCase() + '  ').slice(0, 5) +
+						' [process ' +
+						process.pid +
+						'] - ' +
+						options.message +
+						getMeta(options)
+					);
+				}
+			})
+		);
 	}
 
-	function getMeta (options: IFormatterOptions) {
+	function getMeta(options: IFormatterOptions) {
 		if (Object.keys(options.meta || {}).length) {
 			if (options.meta.stack) {
 				return (options.message ? ' - ' : '') + options.meta.stack;
@@ -55,15 +73,22 @@ export function LoggerInitialisation (config: IConfig) {
 	/**
 	 * Human readable timestamp
 	 */
-	function timestamp () {
+	function timestamp() {
 		const date = new Date();
-		return ('0' + date.getHours()).slice(-2) + ':'
-			+ ('0' + date.getMinutes()).slice(-2) + ':'
-			+ ('0' + date.getSeconds()).slice(-2) + '.'
-			+ ('00' + date.getMilliseconds()).slice(-3) + ' '
-			+ ('0' + date.getDate()).slice(-2) + '/'
-			+ ('0' + (date.getMonth() + 1)).slice(-2);
+		return (
+			('0' + date.getHours()).slice(-2) +
+			':' +
+			('0' + date.getMinutes()).slice(-2) +
+			':' +
+			('0' + date.getSeconds()).slice(-2) +
+			'.' +
+			('00' + date.getMilliseconds()).slice(-3) +
+			' ' +
+			('0' + date.getDate()).slice(-2) +
+			'/' +
+			('0' + (date.getMonth() + 1)).slice(-2)
+		);
 	}
 
 	return winston;
-};
+}

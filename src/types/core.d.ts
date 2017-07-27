@@ -1,32 +1,32 @@
 interface IConfig {
 	server?: {
-		host?: string,
-		port?: number
-	},
-	debug?: Object,
+		host?: string;
+		port?: number;
+	};
+	debug?: Object;
 	logs?: {
-		level?: string,
-		isJson?: boolean,
-		file?: string
-	},
-	database: IDatabaseConfig
+		level?: string;
+		isJson?: boolean;
+		file?: string;
+	};
+	database: IDatabaseConfig;
 }
 
 interface IDatabaseConfig {
-	uri: string,
-	port: number,
-	db: string,
-	username: string,
-	password?: string,
-	autoConnect: boolean
+	uri: string;
+	port: number;
+	db: string;
+	username: string;
+	password?: string;
+	autoConnect: boolean;
 }
 
 interface IFormatterOptions {
-	level: any,
-	message: string,
+	level: any;
+	message: string;
 	meta: {
-		stack?: Object
-	}
+		stack?: Object;
+	};
 }
 
 declare enum ROLES {

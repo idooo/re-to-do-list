@@ -1,12 +1,10 @@
 const mongoose = require('mongoose');
 const mongoosePaginate = require('mongoose-paginate');
 const uniqueValidator = require('mongoose-unique-validator');
-import {AbstractModel} from './abstract.model'
-
+import { AbstractModel } from './abstract.model';
 
 export class User extends AbstractModel {
-
-	constructor () {
+	constructor() {
 		super();
 		this.schema = new mongoose.Schema({
 			name: {
@@ -25,8 +23,7 @@ export class User extends AbstractModel {
 			}
 		});
 
-		this.schema.plugin(uniqueValidator, {message: 'ERROR'});
+		this.schema.plugin(uniqueValidator, { message: 'ERROR' });
 		this.schema.plugin(mongoosePaginate);
 	}
 }
-

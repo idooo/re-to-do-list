@@ -5,18 +5,17 @@ const uuid = require('node-uuid');
 // Will add the UUID type to the Mongoose Schema types
 require('mongoose-uuid2')(mongoose);
 
-import {AbstractModel} from './abstract.model';
+import { AbstractModel } from './abstract.model';
 
 const TODO_TYPES = {
 	DONE: 'DONE',
 	OPEN: 'OPEN',
 	ABANDON: 'ABANDON',
 	IN_PROGRESS: 'IN_PROGRESS'
-}
+};
 
 export class ToDoItem extends AbstractModel {
-
-	constructor () {
+	constructor() {
 		super();
 		this.schema = new mongoose.Schema({
 			text: {
