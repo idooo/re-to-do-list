@@ -1,20 +1,36 @@
 import * as restify from 'restify';
+import * as expressValidator from 'express-validator';
 import * as assert from 'assert';
 import * as fs from 'fs';
 import * as corsMiddleware from 'restify-cors-middleware';
 import { Winston } from 'winston';
+import { Types } from 'mongoose';
 
 import { LoggerInitialisation } from './logging';
 import { Database } from './database';
 import { StatusRouter } from './routes/status.router';
 import { UserRouter } from './routes/users.router';
 import { ToDoListRouter } from './routes/todolist.router';
+import { IConfig } from './types/core';
 
 export class Application {
 	private config: IConfig;
 	private logger: Winston;
 	private server: restify.Server;
 	private database: Database;
+
+	private customValidators = {};
+
+	private customSanitizers = {
+		toObjectId: value => {
+			try {
+				value = Types.ObjectId(value);
+			} catch (e) {
+				// nothing
+			}
+			return value;
+		}
+	};
 
 	/**
 	 * @param {String} configName
@@ -74,6 +90,12 @@ export class Application {
 	setupWebServer() {
 		// Setup server
 		this.server.use(restify.plugins.bodyParser({ mapParams: true }));
+		this.server.use(
+			<any>expressValidator({
+				customValidators: this.customValidators,
+				customSanitizers: this.customSanitizers
+			})
+		);
 		this.server.use(restify.plugins.queryParser());
 
 		// Global uncaughtException Error Handler

@@ -1,45 +1,77 @@
-import { Server, Request, Response, Next } from 'restify';
+import { Server } from 'restify';
 import { AbstractRouter } from './abstract.router';
-import * as logger from 'winston';
+import { IServer } from '../types/core';
+import { ROLE } from '../models/user.model';
+
+const IS_LENGTH_VALIDATION = {
+	isLength: {
+		options: [{ min: 1, max: 100 }],
+		errorMessage: 'Must be between 1 and 1024 chars long'
+	}
+};
 
 export class UserRouter extends AbstractRouter {
 	constructor(server: Server) {
 		super();
 
-		server.get('/api/1.0/users', this.getUsersList.bind(this));
+		server.get('/api/1.0/users', this.getUsers.bind(this));
 		server.post('/api/1.0/user', this.createUser.bind(this));
 	}
 
-	createUser(req: Request, res: Response, next: Next) {
-		const user = new this.model.User({
-			name: UserRouter.filter(req.params.name),
-			role: parseInt(req.params.role, 10) || ROLES.USER
-		});
-
-		user.save((err, createdUser) => {
-			if (err) {
-				this.fail(res, err);
-				return next();
-			} else {
-				this.success(res, createdUser);
-				return next();
+	createUser(req: IServer.Request, res: IServer.Response, next: IServer.Next) {
+		const schema = {
+			name: {
+				...IS_LENGTH_VALIDATION,
+				errorMessage: 'Name must be defined'
 			}
-		});
+		};
+
+		req.sanitizeParams('name').escape();
+		req.sanitizeParams('name').trim();
+		req.check(schema);
+
+		this.validate(req)
+			.then(() => {
+				const user = new this.model.User({
+					name: req.params.name,
+					role: ROLE.USER
+				});
+
+				user.save((err, createdUser) => {
+					if (err) {
+						this.fail(res, err);
+						return next();
+					} else {
+						this.success(res, createdUser);
+						return next();
+					}
+				});
+			})
+			.catch(e => {
+				this.fail(res, e);
+				return next();
+			});
 	}
 
-	getUsersList(req: Request, res: Response, next: Next) {
-		let page = parseInt(req.params.p, 10) || 1;
-		let query = req.params.query || {};
-		let sort = req.params.sort || { _id: -1 }; // sort by date, latest first by default
-		let fields = '-__v -votes';
+	getUsers(req: IServer.Request, res: IServer.Response, next: IServer.Next) {
+		req.check({
+			page: {
+				isInt: true,
+				optional: true
+			}
+		});
 
-		console.log(this.model);
-		this.model.User
-			.paginate(query, {
-				page: page,
-				sort: sort,
-				limit: 20,
-				select: fields
+		this.validate(req)
+			.then(() => {
+				return this.model.User.paginate(
+					{},
+					{
+						page: req.params.page || 1,
+						sort: { _id: -1 },
+						limit: 20,
+						select: '-password'
+					}
+				);
 			})
 			.then(data => {
 				this.success(res, {

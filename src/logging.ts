@@ -1,4 +1,5 @@
 import * as winston from 'winston';
+import { IConfig, IFormatterOptions } from './types/core';
 
 /**
  * @description

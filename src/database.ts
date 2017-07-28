@@ -1,10 +1,10 @@
 import * as logger from 'winston';
+import * as mongoose from 'mongoose';
+
 import { ToDoItem } from './models/todo.model';
 import { User } from './models/user.model';
-
-const mongoose = require('mongoose');
-
-const { DatabaseConnectionError } = require('./errors');
+import { DatabaseConnectionError } from './errors';
+import { IDatabaseConfig } from './types/core';
 
 let instance = null;
 
@@ -43,7 +43,7 @@ export class Database {
 			})
 			.once('open', () => {
 				this.isConnected = true;
-				mongoose.Promise = global.Promise;
+				(<any>mongoose).Promise = global.Promise;
 				logger.info(`DB connected ${this.config.uri}/${this.config.db}`);
 			});
 
@@ -66,13 +66,6 @@ export class Database {
 		}
 	}
 
-	disconnect(callback) {
-		mongoose.disconnect(function(err, value) {
-			if (typeof callback === 'function') callback(err, value);
-			logger.info('Database connection was closed');
-		});
-	}
-
 	clean() {
 		Object.keys(Database.model).forEach(modelName => {
 			if (typeof Database.model[modelName].remove === 'undefined') return;
@@ -80,17 +73,5 @@ export class Database {
 				logger.warn(modelName + ' collection was removed')
 			);
 		});
-	}
-
-	static ObjectId(id) {
-		let value = null;
-		if (!mongoose.Types.ObjectId.isValid(id)) return value;
-
-		try {
-			value = mongoose.Types.ObjectId(id);
-		} catch (e) {
-			// nothing
-		}
-		return value;
 	}
 }

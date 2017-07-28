@@ -1,3 +1,5 @@
+import * as restify from 'restify';
+
 interface IConfig {
 	server?: {
 		host?: string;
@@ -29,7 +31,21 @@ interface IFormatterOptions {
 	};
 }
 
-declare enum ROLES {
-	ADMIN = 10,
-	USER = 2
+declare namespace IServer {
+	interface Request extends restify.Request {
+		checkParams?: Function;
+		sanitizeParams?: Function;
+		getValidationResult?: Function;
+		check?: Function;
+		route: {
+			method: string;
+			path: string;
+		};
+	}
+
+	interface Response extends restify.Response {
+		req: Request;
+	}
+
+	interface Next extends restify.Next {}
 }

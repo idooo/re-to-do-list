@@ -3,6 +3,11 @@ const mongoosePaginate = require('mongoose-paginate');
 const uniqueValidator = require('mongoose-unique-validator');
 import { AbstractModel } from './abstract.model';
 
+export const ROLE = {
+	USER: 2,
+	ADMIN: 10
+};
+
 export class User extends AbstractModel {
 	constructor() {
 		super();
@@ -15,7 +20,7 @@ export class User extends AbstractModel {
 			},
 			role: {
 				type: String,
-				default: 2
+				default: ROLE.USER
 			},
 			creationDate: {
 				type: Date,
@@ -23,7 +28,7 @@ export class User extends AbstractModel {
 			}
 		});
 
-		this.schema.plugin(uniqueValidator, { message: 'ERROR' });
+		this.schema.plugin(uniqueValidator, { message: 'Value is already exist' });
 		this.schema.plugin(mongoosePaginate);
 	}
 }

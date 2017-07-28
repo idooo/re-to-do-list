@@ -7,7 +7,7 @@ require('mongoose-uuid2')(mongoose);
 
 import { AbstractModel } from './abstract.model';
 
-const TODO_TYPES = {
+export const TODO_STATUS_TYPES = {
 	DONE: 'DONE',
 	OPEN: 'OPEN',
 	ABANDON: 'ABANDON',
@@ -25,13 +25,14 @@ export class ToDoItem extends AbstractModel {
 			},
 			status: {
 				type: String,
-				default: TODO_TYPES.OPEN,
-				enum: Object.keys(TODO_TYPES),
+				default: TODO_STATUS_TYPES.OPEN,
+				enum: Object.keys(TODO_STATUS_TYPES),
 				required: true
 			},
 			uuid: {
 				type: mongoose.Types.UUID,
-				default: uuid.v4
+				default: uuid.v4,
+				index: true
 			},
 			author: {
 				type: mongoose.Schema.Types.ObjectId,

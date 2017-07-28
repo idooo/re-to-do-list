@@ -1,8 +1,27 @@
-import { Server, Request, Response } from 'restify';
-import { AbstractRouter } from './abstract.router';
-import * as logger from 'winston';
+import { Server } from 'restify';
 import * as uuid from 'uuid';
-import { Database } from '../database';
+import { IServer } from '../types/core';
+import { AbstractRouter } from './abstract.router';
+import { TODO_STATUS_TYPES } from '../models/todo.model';
+
+const IS_LENGTH_VALIDATION = {
+	isLength: {
+		options: [{ min: 1, max: 1024 }],
+		errorMessage: 'Must be between 1 and 1024 chars long'
+	}
+};
+
+const ACCEPTABLE_STATUSES = Object.keys(TODO_STATUS_TYPES).map(
+	i => TODO_STATUS_TYPES[i]
+);
+const IS_TODO_STATUS_VALIDATION = {
+	isIn: {
+		options: [ACCEPTABLE_STATUSES],
+		errorMessage: `Invalid status: must be one of ${ACCEPTABLE_STATUSES.join(
+			', '
+		)}`
+	}
+};
 
 export class ToDoListRouter extends AbstractRouter {
 	constructor(server: Server) {
@@ -12,19 +31,24 @@ export class ToDoListRouter extends AbstractRouter {
 		server.put('/api/1.0/item/:id', this.updateItem.bind(this));
 	}
 
-	getItems(req: Request, res: Response, next) {
-		let page = parseInt(req.params.p, 10) || 1;
-		let query = req.params.query || {}; //@todo: unsafe - can get data for all users
-		let sort = req.params.sort || { _id: -1 }; // sort by date, latest first by default
-		let fields = '-__v -votes';
+	getItems(req: IServer.Request, res: IServer.Response, next: IServer.Next) {
+		req.check({
+			page: {
+				isInt: true,
+				optional: true
+			}
+		});
 
+		//@todo: get data only for the user
 		this.model.ToDoItem
-			.paginate(query, {
-				page: page,
-				sort: sort,
-				limit: 20,
-				select: fields
-			})
+			.paginate(
+				{},
+				{
+					page: req.params.page || 1,
+					sort: { _id: -1 },
+					limit: 50
+				}
+			)
 			.then(data => {
 				this.success(res, {
 					items: data.docs,
@@ -40,36 +64,81 @@ export class ToDoListRouter extends AbstractRouter {
 			});
 	}
 
-	addItem(req, res, next) {
-		const item = new this.model.ToDoItem({
-			text: ToDoListRouter.filter(req.params.text),
-			uuid: ToDoListRouter.filter(req.params.uuid) || uuid.v4(),
-			dateDelta: parseInt(req.params.dateDelta, 10) || undefined
-			// author: 'ido_q'
-		});
-
-		item.save((err, item) => {
-			if (err) {
-				this.fail(res, err);
-				return next();
-			} else {
-				this.success(res, { item });
-				return next();
+	addItem(req: IServer.Request, res: IServer.Response, next: IServer.Next) {
+		const schema = {
+			text: {
+				...IS_LENGTH_VALIDATION,
+				errorMessage: 'Text must be defined'
+			},
+			uuid: {
+				optional: true,
+				isUUID: {
+					options: [4],
+					errorMessage: 'Invalid UUID'
+				}
 			}
-		});
+		};
+
+		req.sanitizeParams('text').escape();
+		req.sanitizeParams('text').trim();
+		req.check(schema);
+
+		this.validate(req)
+			.then(() => {
+				const item = new this.model.ToDoItem({
+					text: req.params.text,
+					uuid: req.params.uuid || uuid.v4(),
+					dateDelta: parseInt(req.params.dateDelta, 10) || undefined
+				});
+
+				item.save((err, item) => {
+					if (err) {
+						this.fail(res, err);
+						return next();
+					} else {
+						this.success(res, { item });
+						return next();
+					}
+				});
+			})
+			.catch(e => {
+				this.fail(res, e);
+				return next();
+			});
 	}
 
-	updateItem(req, res, next) {
-		const id = Database.ObjectId(req.params.id);
-		const { status } = req.params;
+	updateItem(req: IServer.Request, res: IServer.Response, next: IServer.Next) {
+		const schema = {
+			id: {
+				notEmpty: true,
+				isMongoId: true,
+				errorMessage: 'Invalid id'
+			},
+			status: {
+				optional: true,
+				...IS_TODO_STATUS_VALIDATION
+			},
+			text: {
+				optional: true,
+				...IS_LENGTH_VALIDATION
+			}
+		};
 
-		if (!id) {
-			this.fail(res, { message: 'Not found' });
-			return next();
-		}
+		req.sanitizeParams('id').toObjectId();
+		req.sanitizeParams('text').trim();
+		req.sanitizeParams('text').escape();
+		req.check(schema);
 
-		this.model.ToDoItem
-			.findOneAndUpdate({ _id: id }, { status })
+		return this.validate(req)
+			.then(() => {
+				const update = {};
+				if (req.params.status) update['status'] = req.params.status;
+				if (req.params.text) update['text'] = req.params.text;
+				return this.model.ToDoItem.findOneAndUpdate(
+					{ _id: req.params.id },
+					update
+				);
+			})
 			.then(() => {
 				this.success(res);
 				return next();

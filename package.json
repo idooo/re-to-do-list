@@ -12,12 +12,13 @@
 		"tslint": "tslint -p tsconfig.json",
 		"watch-ts": "tsc -w",
 		"watch": "concurrently -k -p \"[{name}]\" -n \"TypeScript,Node\" -c \"npm run watch-ts\" \"npm run serve\"",
-    "prettier": "prettier --write --use-tabs --single-quote  ./**/*.ts"
+		"prettier": "prettier --write --use-tabs --single-quote  ./**/*.ts"
 	},
 	"engines": {
 		"node": ">6.0.0"
 	},
 	"dependencies": {
+		"express-validator": "^3.2.1",
 		"mongoose": "^4.11.4",
 		"mongoose-paginate": "^5.0.3",
 		"mongoose-unique-validator": "^1.0.5",
@@ -33,6 +34,7 @@
 		"yargs": "^8.0.1"
 	},
 	"devDependencies": {
+		"@types/mongoose": "^4.7.19",
 		"@types/restify": "^5.0.1",
 		"@types/sequelize": "^4.0.67",
 		"@types/winston": "^2.3.4",

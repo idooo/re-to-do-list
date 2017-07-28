@@ -1,6 +1,7 @@
-import { Request, Response } from 'restify';
 import * as logger from 'winston';
 import { Database } from '../database';
+import { ValidationError } from '../errors';
+import { IServer } from '../types/core';
 
 const RE_FILTER = /[^a-zA-Z0-9\s#_\-\)\(\.]+/g;
 
@@ -12,7 +13,7 @@ export class AbstractRouter {
 	 * @param {Object} res response object
 	 * @param {Object} [data] content to return
 	 */
-	success(res: Response, data: any = {}) {
+	success(res: IServer.Response, data: any = {}) {
 		data.status = 'ok';
 		res.send(200, data);
 	}
@@ -23,36 +24,47 @@ export class AbstractRouter {
 	 * @param {Object} [data] content to return
 	 * @param {Number} [code=400] error code
 	 */
-	fail(res: Response, data: any = {}, code: Number = 400) {
-		data.status = 'error';
-		data.code = code;
-		res.send(code, data);
-	}
+	fail(res: IServer.Response, data: any = {}, code: Number = 400) {
+		let responseData = {
+			code,
+			status: 'error'
+		};
 
-	/**
-	 * Attempts to parse request body to get JS object
-	 * @param {Object} req request object
-	 * @returns {{}}
-	 */
-	static body(req) {
-		try {
-			return JSON.parse(req.body);
-		} catch (e) {
-			return {};
+		if (data.name === ValidationError.name) {
+			if (data.errors) {
+				responseData['details'] = {};
+				for (let fieldName of Object.keys(data.errors)) {
+					responseData['details'][fieldName] =
+						data.errors[fieldName].properties;
+					responseData['details'][fieldName]['name'] =
+						responseData['details'][fieldName]['path'];
+					delete responseData['details'][fieldName]['path'];
+				}
+			} else {
+				responseData = { ...responseData, ...data };
+			}
+			delete responseData['name'];
+			logger.info(
+				`Validation Error: ${res.req.route.method} ${res.req.route.path}`,
+				responseData['details']
+			);
+		} else {
+			responseData = { ...responseData, ...data };
 		}
+		res.send(code, responseData);
 	}
 
 	/**
-	 * Attempts to filter incoming string. Returns null if string null or undefined.
-	 * Otherwise returns trimmed and sanitised version of the string
-	 * @param {String} str
-	 * @returns {*}
+	 * Executes validation against the request
+	 * @param {IServer.Request} req
+	 * @returns {Promise<any>}
 	 */
-	static filter(str) {
-		if (str === null || str === undefined) return null;
-		return (str.toString() || '')
-			.trim()
-			.replace(RE_FILTER, '')
-			.replace(/(\s+|\t+)/g, ' ');
+	validate(req: IServer.Request): Promise<any> {
+		return req.getValidationResult().then(result => {
+			if (!result.isEmpty()) {
+				throw new ValidationError(result.mapped());
+			}
+		});
 	}
+
 }

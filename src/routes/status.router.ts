@@ -1,5 +1,6 @@
-import { Server, Request, Response } from 'restify';
+import { Server } from 'restify';
 import { AbstractRouter } from './abstract.router';
+import { IConfig, IServer } from '../types/core';
 
 const FIELDS_TO_MASK = ['password', 'database'];
 
@@ -9,7 +10,7 @@ export class StatusRouter extends AbstractRouter {
 		server.get('/api/1.0/status', this.routeStatus.bind(this));
 	}
 
-	routeStatus(req: Request, res: Response) {
+	routeStatus(req: IServer.Request, res: IServer.Response) {
 		const sanitisedConfig = StatusRouter.maskFields(
 			JSON.parse(JSON.stringify(this.config)),
 			FIELDS_TO_MASK
