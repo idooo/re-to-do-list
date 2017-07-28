@@ -1,10 +1,6 @@
-const mongoose = require('mongoose');
-const mongoosePaginate = require('mongoose-paginate');
-const uuid = require('node-uuid');
-
-// Will add the UUID type to the Mongoose Schema types
-require('mongoose-uuid2')(mongoose);
-
+import * as mongoose from 'mongoose'
+import * as mongoosePaginate from 'mongoose-paginate';
+import * as uuid from 'node-uuid';
 import { AbstractModel } from './abstract.model';
 
 export const TODO_STATUS_TYPES = {
@@ -30,7 +26,7 @@ export class ToDoItem extends AbstractModel {
 				required: true
 			},
 			uuid: {
-				type: mongoose.Types.UUID,
+				type: String,
 				default: uuid.v4,
 				index: true
 			},

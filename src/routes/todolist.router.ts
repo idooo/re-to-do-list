@@ -40,15 +40,14 @@ export class ToDoListRouter extends AbstractRouter {
 		});
 
 		//@todo: get data only for the user
-		this.model.ToDoItem
-			.paginate(
-				{},
-				{
+		this.validate(req)
+			.then(() => {
+				return this.model.ToDoItem.paginate({}, {
 					page: req.params.page || 1,
 					sort: { _id: -1 },
 					limit: 50
-				}
-			)
+				})
+			})
 			.then(data => {
 				this.success(res, {
 					items: data.docs,
@@ -58,8 +57,8 @@ export class ToDoListRouter extends AbstractRouter {
 				});
 				return next();
 			})
-			.catch(function(err) {
-				this.fail(res, err);
+			.catch(e => {
+				this.fail(res, e);
 				return next();
 			});
 	}

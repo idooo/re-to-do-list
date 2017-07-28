@@ -49,6 +49,12 @@ export class AbstractRouter {
 			);
 		} else {
 			responseData = { ...responseData, ...data };
+			if (data.stack) {
+				logger.error(
+					`Internal Error: ${res.req.route.method} ${res.req.route.path}`,
+					data.stack
+				);
+			}
 		}
 		res.send(code, responseData);
 	}

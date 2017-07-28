@@ -1,4 +1,4 @@
-const logger = require('winston');
+import * as logger from 'winston';
 
 export class AbstractModel {
 	public name: string;
