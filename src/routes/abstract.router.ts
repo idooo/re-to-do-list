@@ -3,7 +3,6 @@ import { Database } from '../database';
 import { ValidationError } from '../errors';
 import { IServer } from '../types/core';
 
-const RE_FILTER = /[^a-zA-Z0-9\s#_\-\)\(\.]+/g;
 
 export class AbstractRouter {
 	public model: any = Database.model;
