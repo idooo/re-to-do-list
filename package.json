@@ -19,6 +19,7 @@
 	},
 	"dependencies": {
 		"express-validator": "^3.2.1",
+		"moment": "^2.18.1",
 		"mongoose": "^4.11.4",
 		"mongoose-paginate": "^5.0.3",
 		"mongoose-unique-validator": "^1.0.5",
@@ -33,6 +34,7 @@
 		"yargs": "^8.0.1"
 	},
 	"devDependencies": {
+		"@types/moment": "^2.13.0",
 		"@types/mongoose": "^4.7.19",
 		"@types/restify": "^5.0.1",
 		"@types/sequelize": "^4.0.67",

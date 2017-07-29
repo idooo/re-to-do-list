@@ -1,4 +1,14 @@
 import * as logger from 'winston';
+import { Types } from "mongoose";
+
+export function toObjectIdSanitiser (value) {
+	try {
+		value = Types.ObjectId(value);
+	} catch (e) {
+		// nothing
+	}
+	return value;
+}
 
 export class AbstractModel {
 	public name: string;

@@ -2,6 +2,7 @@ import * as mongoose from 'mongoose'
 import * as mongoosePaginate from 'mongoose-paginate';
 import * as uuid from 'node-uuid';
 import { AbstractModel } from './abstract.model';
+import * as moment from 'moment';
 
 export const TODO_STATUS_TYPES = {
 	DONE: 'DONE',
@@ -9,6 +10,8 @@ export const TODO_STATUS_TYPES = {
 	ABANDON: 'ABANDON',
 	IN_PROGRESS: 'IN_PROGRESS'
 };
+
+export const TODO_DATE_CODE_FORMAT = 'DDMMYYYY';
 
 export class ToDoItem extends AbstractModel {
 	constructor() {
@@ -34,9 +37,10 @@ export class ToDoItem extends AbstractModel {
 				type: mongoose.Schema.Types.ObjectId,
 				required: false // @todo required
 			},
-			dateDelta: {
-				type: Number,
-				default: 0
+			dateCode: {
+				type: String,
+				default: () => moment().format(TODO_DATE_CODE_FORMAT),
+				index: true
 			},
 			creationDate: {
 				type: Date,

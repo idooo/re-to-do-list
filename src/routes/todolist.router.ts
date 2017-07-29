@@ -1,8 +1,9 @@
 import { Server } from 'restify';
 import * as uuid from 'uuid';
+import * as moment from 'moment';
 import { IServer } from '../types/core';
 import { AbstractRouter } from './abstract.router';
-import { TODO_STATUS_TYPES } from '../models/todo.model';
+import { TODO_DATE_CODE_FORMAT, TODO_STATUS_TYPES } from '../models/todo.model';
 
 const IS_LENGTH_VALIDATION = {
 	isLength: {
@@ -22,6 +23,12 @@ const IS_TODO_STATUS_VALIDATION = {
 		)}`
 	}
 };
+
+export function toDateCodeSanitiser (value) {
+	const toDateCode = moment(value, TODO_DATE_CODE_FORMAT).format(TODO_DATE_CODE_FORMAT);
+	if (toDateCode === 'Invalid date') return moment().format(TODO_DATE_CODE_FORMAT);
+	return toDateCode;
+}
 
 export class ToDoListRouter extends AbstractRouter {
 	constructor(server: Server) {
@@ -80,6 +87,7 @@ export class ToDoListRouter extends AbstractRouter {
 
 		req.sanitizeParams('text').escape();
 		req.sanitizeParams('text').trim();
+		req.sanitizeParams('dateCode').toDateCode();
 		req.check(schema);
 
 		this.validate(req)
@@ -87,7 +95,7 @@ export class ToDoListRouter extends AbstractRouter {
 				const item = new this.model.ToDoItem({
 					text: req.params.text,
 					uuid: req.params.uuid || uuid.v4(),
-					dateDelta: parseInt(req.params.dateDelta, 10) || undefined
+					dateCode: req.params.dateCode
 				});
 
 				item.save((err, item) => {
