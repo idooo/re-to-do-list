@@ -5,13 +5,16 @@ import * as fs from 'fs';
 import * as corsMiddleware from 'restify-cors-middleware';
 import { Winston } from 'winston';
 
-import { IConfig } from './types/core';
+import { IConfig, IServer } from './types/core';
 import { LoggerInitialisation } from './logging';
 import { Database } from './database';
 import { StatusRouter } from './routes/status.router';
 import { UserRouter } from './routes/users.router';
-import { toDateCodeSanitiser, ToDoListRouter } from './routes/todolist.router';
+import { toDateCodeSanitiser, ToDoItemRouter } from './routes/item.router';
 import { toObjectIdSanitiser } from "./models/abstract.model";
+import { INTERNAL_ERROR } from "./routes/abstract.router";
+import { AuthRouter } from './routes/auth.router';
+import { Authentication } from "./auth";
 
 export class Application {
 	private config: IConfig;
@@ -60,15 +63,18 @@ export class Application {
 
 		// Web server
 		this.server = restify.createServer({});
+
+		new Authentication(this.server, this.config);
 		this.setupWebServer();
 
 		// Connect to DB and load model
 		this.database = new Database(this.config.database);
 
 		// Routing
+		new AuthRouter(this.server, this.config);
 		new StatusRouter(this.server, this.config);
 		new UserRouter(this.server);
-		new ToDoListRouter(this.server);
+		new ToDoItemRouter(this.server);
 	}
 
 	start() {
@@ -83,7 +89,7 @@ export class Application {
 
 	setupWebServer() {
 		// Setup server
-		this.server.use(restify.plugins.bodyParser({ mapParams: true }));
+		this.server.use(restify.plugins.bodyParser({mapParams: true}));
 		this.server.use(
 			<any>expressValidator({
 				customValidators: this.customValidators,
@@ -92,37 +98,36 @@ export class Application {
 		);
 		this.server.use(restify.plugins.queryParser());
 
-		// Global uncaughtException Error Handler
-		this.server.on(
-			'uncaughtException',
-			(
-				req: restify.Response,
-				res: restify.Response,
-				route: Object,
-				error: Error
-			) => {
-				this.logger.warn('uncaughtException', route, error.stack.toString());
+		if (this.config.server.catchUncaughtException) {
+			// Global uncaughtException Error Handler
+			this.server.on(
+				'uncaughtException',
+				(req: IServer.Response,
+				 res: IServer.Response,
+				 route: Object,
+				 error: Error) => {
+					this.logger.warn('uncaughtException', route, error.stack.toString());
 
-				res.send(500, {
-					error: 'INTERNAL_ERROR',
-					status: 'error'
-				});
-			}
-		);
+					res.send(500, {
+						error: INTERNAL_ERROR
+					});
+				}
+			);
+		}
 
 		this.server.use(
-			(req: restify.Request, res: restify.Response, next: restify.Next) => {
+			(req: IServer.Request, res: IServer.Response, next: IServer.Next) => {
 				// Add debug logger for /api/ endpoints
 				if (/\/api\/.*/.test(req.url)) {
-					this.logger.debug(`${req.method} ${req.url}`);
+					this.logger.debug(`${req.method} ${req.url} - auth: ${(req.user || {})._id}`);
 				}
-
 				return next();
 			}
 		);
 
 		const cors = corsMiddleware({
-			origins: ['http://localhost:*']
+			origins: ['http://localhost:*'],
+			allowHeaders: ['Authorization'],
 		});
 
 		this.server.pre(cors.preflight);

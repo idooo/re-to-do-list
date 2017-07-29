@@ -34,6 +34,7 @@ export class UserRouter extends AbstractRouter {
 			.then(() => {
 				const user = new this.model.User({
 					name: req.params.name,
+					email: req.params.email,
 					role: ROLE.USER
 				});
 

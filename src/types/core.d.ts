@@ -1,9 +1,10 @@
 import * as restify from 'restify';
 
 interface IConfig {
-	server?: {
+	server: {
 		host?: string;
 		port?: number;
+		catchUncaughtException?: false
 	};
 	debug?: Object;
 	logs?: {
@@ -11,7 +12,21 @@ interface IConfig {
 		isJson?: boolean;
 		file?: string;
 	};
+	auth: {
+		jwtSecret: string;
+		successRedirectURL: string;
+		providers: {
+			auth0: IAuth0Config
+		};
+	}
 	database: IDatabaseConfig;
+}
+
+interface IAuth0Config {
+	domain: string;
+	clientID: string;
+	clientSecret: string;
+	callbackURL: string;
 }
 
 interface IDatabaseConfig {
@@ -27,7 +42,7 @@ interface IFormatterOptions {
 	level: any;
 	message: string;
 	meta: {
-		stack?: Object;
+		stack?: any;
 	};
 }
 
@@ -37,6 +52,7 @@ declare namespace IServer {
 		sanitizeParams?: Function;
 		getValidationResult?: Function;
 		check?: Function;
+		user?: any;
 		route: {
 			method: string;
 			path: string;

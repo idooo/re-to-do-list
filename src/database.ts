@@ -11,7 +11,10 @@ let instance = null;
 /** singleton */
 export class Database {
 	private isConnected: boolean = false;
-	public static model = {};
+	public static model = {
+		ToDoItem: ToDoItem,
+		User: User
+	};
 
 	constructor(private config: IDatabaseConfig) {
 		if (instance) return instance;
@@ -21,20 +24,16 @@ export class Database {
 	}
 
 	connect() {
-		const options = {
-			db: { native_parser: true },
-			server: { poolSize: 5 }
-		};
+		let authString = '';
 
 		if (this.config && this.config.username) {
 			logger.info('DB Auth enabled');
-			options['user'] = this.config.username;
-			options['pass'] = this.config.password;
+			authString = `${this.config.username}:${this.config.password}@`;
 		}
 
 		mongoose.connect(
-			`${this.config.uri}:${this.config.port}/${this.config.db}`,
-			options
+			`mongodb://${authString}${this.config.uri}:${this.config.port}/${this.config.db}`,
+			{useMongoClient: true}
 		);
 
 		mongoose.connection
@@ -47,18 +46,12 @@ export class Database {
 				logger.info(`DB connected ${this.config.uri}/${this.config.db}`);
 			});
 
-		this.loadModel();
+		Database.loadModel();
 	}
 
-	loadModel() {
-		// load models
-		const models = {
-			ToDoItem: ToDoItem,
-			User: User
-		};
-
-		for (let modelName in models) {
-			const schemaDefinition = new models[modelName]();
+	private static loadModel() {
+		for (let modelName in Database.model) {
+			const schemaDefinition = new Database.model[modelName]();
 			Database.model[schemaDefinition.name] = mongoose.model(
 				schemaDefinition.name,
 				schemaDefinition.schema

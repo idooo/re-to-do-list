@@ -16,6 +16,6 @@ export class AbstractModel {
 
 	constructor() {
 		this.name = this.constructor.name;
-		logger.debug('Schema has been loaded');
+		logger.debug(`Schema ${this.name} has been loaded`);
 	}
 }

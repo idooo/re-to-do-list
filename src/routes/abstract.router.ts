@@ -2,7 +2,10 @@ import * as logger from 'winston';
 import { Database } from '../database';
 import { ValidationError } from '../errors';
 import { IServer } from '../types/core';
+import { MongoError } from "mongodb";
 
+
+export const INTERNAL_ERROR = 'INTERNAL_ERROR';
 
 export class AbstractRouter {
 	public model: any = Database.model;
@@ -13,20 +16,19 @@ export class AbstractRouter {
 	 * @param {Object} [data] content to return
 	 */
 	success(res: IServer.Response, data: any = {}) {
-		data.status = 'ok';
 		res.send(200, data);
 	}
 
 	/**
-	 * Sends error response to the user
+	 * Sends error response to the user, handles validation and internal errors output
+	 *
 	 * @param {Object} res response object
 	 * @param {Object} [data] content to return
 	 * @param {Number} [code=400] error code
 	 */
 	fail(res: IServer.Response, data: any = {}, code: Number = 400) {
 		let responseData = {
-			code,
-			status: 'error'
+			code
 		};
 
 		if (data.name === ValidationError.name) {
@@ -48,7 +50,17 @@ export class AbstractRouter {
 				responseData['details']
 			);
 		} else {
-			responseData = { ...responseData, ...data };
+
+			if (data.name === MongoError.name) {
+				(<any>responseData) = {
+					code: 500,
+					error: INTERNAL_ERROR
+				};
+			}
+			else {
+				responseData = {...responseData, ...data};
+			}
+
 			if (data.stack) {
 				logger.error(
 					`Internal Error: ${res.req.route.method} ${res.req.route.path}`,

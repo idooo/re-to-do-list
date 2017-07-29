@@ -1,31 +1,21 @@
 import * as mongoose from 'mongoose'
 import * as mongoosePaginate from 'mongoose-paginate';
-import * as uniqueValidator from 'mongoose-unique-validator';
 import { AbstractModel } from './abstract.model';
 
-export const ROLE = {
-	USER: 2,
-	ADMIN: 10
-};
 
-export class User extends AbstractModel {
+export class ToDoList extends AbstractModel {
 	constructor() {
 		super();
 		this.schema = new mongoose.Schema({
 			name: {
 				type: String,
 				trim: true,
-				unique: true
+				required: true
 			},
-			email: {
-				type: String,
-				trim: true,
+			user: {
+				type: mongoose.Schema.Types.ObjectId,
 				required: true,
-				unique: true
-			},
-			role: {
-				type: String,
-				default: ROLE.USER
+				ref: 'User'
 			},
 			creationDate: {
 				type: Date,
@@ -33,7 +23,6 @@ export class User extends AbstractModel {
 			}
 		});
 
-		this.schema.plugin(uniqueValidator, { message: 'Value is already exist' });
 		this.schema.plugin(mongoosePaginate);
 	}
 }

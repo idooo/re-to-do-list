@@ -30,7 +30,7 @@ export function toDateCodeSanitiser (value) {
 	return toDateCode;
 }
 
-export class ToDoListRouter extends AbstractRouter {
+export class ToDoItemRouter extends AbstractRouter {
 	constructor(server: Server) {
 		super();
 		server.get('/api/1.0/items', this.getItems.bind(this));

@@ -33,7 +33,7 @@ export class ToDoItem extends AbstractModel {
 				default: uuid.v4,
 				index: true
 			},
-			author: {
+			list: {
 				type: mongoose.Schema.Types.ObjectId,
 				required: false // @todo required
 			},

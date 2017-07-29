@@ -1,13 +1,14 @@
 import { Server } from 'restify';
+import * as jwt from 'express-jwt';
 import { AbstractRouter } from './abstract.router';
 import { IConfig, IServer } from '../types/core';
 
-const FIELDS_TO_MASK = ['password', 'database'];
+const FIELDS_TO_MASK = ['password', 'database', 'auth'];
 
 export class StatusRouter extends AbstractRouter {
 	constructor(server: Server, private config: IConfig) {
 		super();
-		server.get('/api/1.0/status', this.routeStatus.bind(this));
+		server.get('/api/1.0/status', jwt({secret: 'bW89XvUGiOSlczkykCO8dvR3ayNo7K1c0Js_V1BuY_ZT44eYmyMPxVr2qdvL3nbJ'}), this.routeStatus.bind(this));
 	}
 
 	routeStatus(req: IServer.Request, res: IServer.Response) {
@@ -16,7 +17,8 @@ export class StatusRouter extends AbstractRouter {
 			FIELDS_TO_MASK
 		);
 		this.success(res, {
-			config: sanitisedConfig
+			config: sanitisedConfig,
+			status: 'healthy'
 		});
 	}
 
