@@ -35,7 +35,8 @@ export class ToDoItem extends AbstractModel {
 			},
 			list: {
 				type: mongoose.Schema.Types.ObjectId,
-				required: false // @todo required
+				required: true,
+				ref: 'List'
 			},
 			dateCode: {
 				type: String,

@@ -98,22 +98,20 @@ export class Application {
 		);
 		this.server.use(restify.plugins.queryParser());
 
-		if (this.config.server.catchUncaughtException) {
-			// Global uncaughtException Error Handler
-			this.server.on(
-				'uncaughtException',
-				(req: IServer.Response,
-				 res: IServer.Response,
-				 route: Object,
-				 error: Error) => {
-					this.logger.warn('uncaughtException', route, error.stack.toString());
+		// Global uncaughtException Error Handler
+		this.server.on(
+			'uncaughtException',
+			(req: IServer.Response,
+			 res: IServer.Response,
+			 route: Object,
+			 error: Error) => {
+				this.logger.warn('uncaughtException', route, error.stack.toString());
 
-					res.send(500, {
-						error: INTERNAL_ERROR
-					});
-				}
-			);
-		}
+				res.send(500, {
+					error: INTERNAL_ERROR
+				});
+			}
+		);
 
 		this.server.use(
 			(req: IServer.Request, res: IServer.Response, next: IServer.Next) => {

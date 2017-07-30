@@ -2,10 +2,12 @@ import * as passport from 'passport-restify';
 import * as Auth0Strategy from 'passport-auth0';
 import * as logger from 'winston';
 import * as jwt from 'express-jwt';
+
 import { Database } from "./database";
 import { ROLE } from "./models/user.model";
 import { Server } from "restify";
 import { IConfig } from "./types/core";
+import { UserCreationError } from "./errors";
 
 
 export class Authentication {
@@ -18,20 +20,13 @@ export class Authentication {
 			(accessToken, refreshToken, extraParams, profile, done) => {
 				try {
 					// @todo what if multiple emails
-					(<any>Database.model.User).findOne({email: profile.emails[0].value})
+					this.getOrCreateUser(profile.emails[0].value)
 						.then(user => {
-							if (!user) {
-								const newUser = new (<any>Database.model.User)({
-									email: profile.emails[0].value,
-									role: ROLE.USER
-								});
-
-								return newUser.save();
-							}
-							return user;
-						})
-						.then(user => {
+							logger.debug(`User has been authorised: ${user.email}`);
 							done(null, user);
+						})
+						.catch(err => {
+							throw new UserCreationError(err);
 						})
 				}
 				catch (e) {
@@ -47,5 +42,31 @@ export class Authentication {
 			/^(?!\/api\/).*/,
 			{ method: 'OPTIONS' }
 		]}));
+	}
+
+	getOrCreateUser (email: string): Promise<any> {
+		return new Promise((resolve, reject) => {
+			(<any>Database.model.User).findOne({email})
+				.then(user => {
+					if (user) return resolve(user);
+
+					const newUser = new (<any>Database.model.User)({
+						email: email,
+						role: ROLE.USER
+					});
+					return newUser.save();
+				})
+				.then(user => {
+					logger.info(`New user created: ${user.email}`);
+					const list = new (<any>Database.model.ToDoList)({
+						user: user._id,
+						name: 'My First ToDo List'
+					});
+					list.save();
+					resolve(user);
+				})
+				.catch(err => reject(err));
+		})
+
 	}
 }

@@ -1,6 +1,6 @@
 import * as logger from 'winston';
 import { Database } from '../database';
-import { ValidationError } from '../errors';
+import { NotFoundError, ValidationError } from '../errors';
 import { IServer } from '../types/core';
 import { MongoError } from "mongodb";
 
@@ -31,6 +31,7 @@ export class AbstractRouter {
 			code
 		};
 
+		// Restify and Mongoose validation errors handling
 		if (data.name === ValidationError.name) {
 			if (data.errors) {
 				responseData['details'] = {};
@@ -49,26 +50,35 @@ export class AbstractRouter {
 				`Validation Error: ${res.req.route.method} ${res.req.route.path}`,
 				responseData['details']
 			);
-		} else {
-
-			if (data.name === MongoError.name) {
-				(<any>responseData) = {
-					code: 500,
-					error: INTERNAL_ERROR
-				};
-			}
-			else {
-				responseData = {...responseData, ...data};
-			}
-
-			if (data.stack) {
-				logger.error(
-					`Internal Error: ${res.req.route.method} ${res.req.route.path}`,
-					data.stack
-				);
-			}
+			return res.send(code, responseData);
 		}
-		res.send(code, responseData);
+
+		// Pretty common errors
+		if (data.name === NotFoundError.name) {
+			logger.warn(`${res.req.route.method} ${res.req.route.path}: ${data}`);
+			return res.send(404, {
+				message: data.message
+			});
+		}
+
+		// Unhandled and handled database errors handling will be treated as internal errors
+		if (data.name === MongoError.name) {
+			(<any>responseData) = {
+				code: 500,
+				error: INTERNAL_ERROR
+			};
+		}
+		else {
+			responseData = {...responseData, ...data};
+		}
+
+		if (data.stack) {
+			logger.error(
+				`Internal Error: ${res.req.route.method} ${res.req.route.path}`,
+				data.stack
+			);
+		}
+		return res.send(404, responseData);
 	}
 
 	/**

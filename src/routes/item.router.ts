@@ -4,6 +4,7 @@ import * as moment from 'moment';
 import { IServer } from '../types/core';
 import { AbstractRouter } from './abstract.router';
 import { TODO_DATE_CODE_FORMAT, TODO_STATUS_TYPES } from '../models/todo.model';
+import { NotFoundError } from "../errors";
 
 const IS_LENGTH_VALIDATION = {
 	isLength: {
@@ -23,6 +24,15 @@ const IS_TODO_STATUS_VALIDATION = {
 		)}`
 	}
 };
+const IS_PAGE_VALIDATION = {
+	isInt: true,
+	optional: true
+};
+const IS_ID_VALIDATION = {
+	notEmpty: true,
+	isMongoId: true,
+	errorMessage: 'Invalid id'
+};
 
 export function toDateCodeSanitiser (value) {
 	const toDateCode = moment(value, TODO_DATE_CODE_FORMAT).format(TODO_DATE_CODE_FORMAT);
@@ -33,34 +43,68 @@ export function toDateCodeSanitiser (value) {
 export class ToDoItemRouter extends AbstractRouter {
 	constructor(server: Server) {
 		super();
-		server.get('/api/1.0/items', this.getItems.bind(this));
-		server.post('/api/1.0/item', this.addItem.bind(this));
-		server.put('/api/1.0/item/:id', this.updateItem.bind(this));
+
+		server.get('/api/1.0/lists', this.getLists.bind(this));
+		server.get('/api/1.0/list/:listId', this.getItems.bind(this));
+		server.post('/api/1.0/list/:listId/item', this.addItem.bind(this));
+		server.put('/api/1.0/list/:listId/item/:itemId', this.updateItem.bind(this));
 	}
 
-	getItems(req: IServer.Request, res: IServer.Response, next: IServer.Next) {
+	getLists (req: IServer.Request, res: IServer.Response, next: IServer.Next) {
 		req.check({
-			page: {
-				isInt: true,
-				optional: true
-			}
+			page: {...IS_PAGE_VALIDATION}
 		});
 
-		//@todo: get data only for the user
 		this.validate(req)
 			.then(() => {
-				return this.model.ToDoItem.paginate({}, {
+				return this.model.ToDoList.paginate({user: req.user._id}, {
 					page: req.params.page || 1,
-					sort: { _id: -1 },
+					sort: { _id : -1 },
 					limit: 50
 				})
 			})
 			.then(data => {
+				this.success(res, data);
+				return next();
+			})
+			.catch(e => {
+				this.fail(res, e);
+				return next();
+			});
+	}
+
+	getItems(req: IServer.Request, res: IServer.Response, next: IServer.Next) {
+
+		req.sanitizeParams('listId').toObjectId();
+		req.check({
+			page: {...IS_PAGE_VALIDATION},
+			listId: {...IS_ID_VALIDATION}
+		});
+
+
+		this.validate(req)
+			.then(() => {
+				return this.model.ToDoList.findOne({
+					_id: req.params.listId,
+					user: req.user._id
+				})
+			})
+			.then(list => {
+				if (!list) throw new NotFoundError(`List ${req.params.listId} not found`);
+
+				return Promise.all([
+					list,
+					this.model.ToDoItem.paginate({list: list._id}, {
+						page: req.params.page || 1,
+						sort: { _id: -1 },
+						limit: 50
+					})
+				]);
+			})
+			.then(data => {
 				this.success(res, {
-					items: data.docs,
-					pageCount: data.pages,
-					itemCount: data.total,
-					currentPage: data.page
+					list: data[0],
+					...data[1]
 				});
 				return next();
 			})
@@ -72,6 +116,9 @@ export class ToDoItemRouter extends AbstractRouter {
 
 	addItem(req: IServer.Request, res: IServer.Response, next: IServer.Next) {
 		const schema = {
+			listId: {
+				...IS_ID_VALIDATION
+			},
 			text: {
 				...IS_LENGTH_VALIDATION,
 				errorMessage: 'Text must be defined'
@@ -85,6 +132,7 @@ export class ToDoItemRouter extends AbstractRouter {
 			}
 		};
 
+		req.sanitizeParams('listId').toObjectId();
 		req.sanitizeParams('text').escape();
 		req.sanitizeParams('text').trim();
 		req.sanitizeParams('dateCode').toDateCode();
@@ -92,21 +140,24 @@ export class ToDoItemRouter extends AbstractRouter {
 
 		this.validate(req)
 			.then(() => {
+				return this.model.ToDoList.findOne({
+					_id: req.params.listId,
+					user: req.user._id
+				})
+			})
+			.then(list => {
+				if (!list) throw new NotFoundError(`List ${req.params.listId} not found`);
 				const item = new this.model.ToDoItem({
 					text: req.params.text,
+					list: list._id,
 					uuid: req.params.uuid || uuid.v4(),
 					dateCode: req.params.dateCode
 				});
-
-				item.save((err, item) => {
-					if (err) {
-						this.fail(res, err);
-						return next();
-					} else {
-						this.success(res, { item });
-						return next();
-					}
-				});
+				return item.save();
+			})
+			.then(item => {
+				this.success(res, { item });
+				return next();
 			})
 			.catch(e => {
 				this.fail(res, e);
@@ -116,10 +167,11 @@ export class ToDoItemRouter extends AbstractRouter {
 
 	updateItem(req: IServer.Request, res: IServer.Response, next: IServer.Next) {
 		const schema = {
-			id: {
-				notEmpty: true,
-				isMongoId: true,
-				errorMessage: 'Invalid id'
+			itemId: {
+				...IS_ID_VALIDATION
+			},
+			listId: {
+				...IS_ID_VALIDATION
 			},
 			status: {
 				optional: true,
@@ -131,23 +183,32 @@ export class ToDoItemRouter extends AbstractRouter {
 			}
 		};
 
-		req.sanitizeParams('id').toObjectId();
+		req.sanitizeParams('itemId').toObjectId();
+		req.sanitizeParams('listId').toObjectId();
 		req.sanitizeParams('text').trim();
 		req.sanitizeParams('text').escape();
 		req.check(schema);
 
-		return this.validate(req)
+		this.validate(req)
 			.then(() => {
+				return this.model.ToDoList.findOne({
+					_id: req.params.listId,
+					user: req.user._id
+				})
+			})
+			.then(list => {
+				if (!list) throw new NotFoundError(`List ${req.params.listId} not found`);
 				const update = {};
 				if (req.params.status) update['status'] = req.params.status;
 				if (req.params.text) update['text'] = req.params.text;
 				return this.model.ToDoItem.findOneAndUpdate(
-					{ _id: req.params.id },
+					{ _id: req.params.itemId },
 					update
 				);
 			})
-			.then(() => {
-				this.success(res);
+			.then(item => {
+				if (!item) throw new NotFoundError(`Item ${req.params.itemId} not found`);
+				this.success(res, { item });
 				return next();
 			})
 			.catch(e => {

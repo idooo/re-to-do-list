@@ -22,9 +22,11 @@ class ExtendableError extends Error {
  * List of custom errors
  */
 
-export class ConfigurationParseError extends ExtendableError {}
+export class UserCreationError extends ExtendableError {}
 
 export class DatabaseConnectionError extends ExtendableError {}
+
+export class NotFoundError extends ExtendableError {}
 
 export class ValidationError extends ExtendableError {
 	constructor(details = {}) {

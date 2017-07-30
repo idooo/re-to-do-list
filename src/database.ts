@@ -1,10 +1,11 @@
 import * as logger from 'winston';
 import * as mongoose from 'mongoose';
 
+import { IDatabaseConfig } from './types/core';
+import { DatabaseConnectionError } from './errors';
 import { ToDoItem } from './models/todo.model';
 import { User } from './models/user.model';
-import { DatabaseConnectionError } from './errors';
-import { IDatabaseConfig } from './types/core';
+import { ToDoList } from "./models/list.model";
 
 let instance = null;
 
@@ -13,7 +14,8 @@ export class Database {
 	private isConnected: boolean = false;
 	public static model = {
 		ToDoItem: ToDoItem,
-		User: User
+		User: User,
+		ToDoList: ToDoList
 	};
 
 	constructor(private config: IDatabaseConfig) {
