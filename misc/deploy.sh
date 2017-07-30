@@ -37,5 +37,5 @@ ssh $HOST << EOF
   rsync -av ~/todo /var/www;
   cd /var/www/todo
 
-  # forever start /var/www/todo/server.js
+  forever start /var/www/todo/dist/server.js
 EOF
