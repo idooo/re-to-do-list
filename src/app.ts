@@ -8,13 +8,16 @@ import { Winston } from 'winston';
 import { IConfig, IServer } from './types/core';
 import { LoggerInitialisation } from './logging';
 import { Database } from './database';
+import { Authentication } from "./auth";
+import { toObjectIdSanitiser } from "./models/abstract.model";
+
+import { INTERNAL_ERROR } from "./routes/abstract.router";
+import { toDateCodeSanitiser, ToDoItemRouter } from './routes/item.router';
+import { StaticRouter } from "./routes/static.router";
 import { StatusRouter } from './routes/status.router';
 import { UserRouter } from './routes/users.router';
-import { toDateCodeSanitiser, ToDoItemRouter } from './routes/item.router';
-import { toObjectIdSanitiser } from "./models/abstract.model";
-import { INTERNAL_ERROR } from "./routes/abstract.router";
 import { AuthRouter } from './routes/auth.router';
-import { Authentication } from "./auth";
+
 
 export class Application {
 	private config: IConfig;
@@ -71,6 +74,7 @@ export class Application {
 		this.database = new Database(this.config.database);
 
 		// Routing
+		new StaticRouter(this.server);
 		new AuthRouter(this.server, this.config);
 		new StatusRouter(this.server, this.config);
 		new UserRouter(this.server);

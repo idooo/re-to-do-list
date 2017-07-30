@@ -40,7 +40,9 @@ export class Authentication {
 
 		server.use(jwt({secret: config.auth.jwtSecret}).unless({path: [
 			/^(?!\/api\/).*/,
-			{ method: 'OPTIONS' }
+			{ method: 'OPTIONS' },
+			'/api/1.0/login',
+			'/api/1.0/callback'
 		]}));
 	}
 

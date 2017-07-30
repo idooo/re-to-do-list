@@ -4,12 +4,8 @@
 npm start --config ./config/local.json
 ```
 
+### Deploy
+
 ```
-
-item          list
----- 
-text
-status
-list-association
-
+npm run deploy 123.123.123.123 /Users/ido/src/web-re-to-do-list/
 ```

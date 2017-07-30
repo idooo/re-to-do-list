@@ -5,8 +5,9 @@
 	"license": "MIT",
 	"main": "server.js",
 	"scripts": {
-		"start": "npm run build && npm run watch",
-		"build": "npm run build-ts ",
+		"start": "npm run build-ts && npm run watch",
+		"build": "npm run build-ts",
+    "deploy": "bash misc/deploy.sh",
 		"serve": "nodemon dist/server.js",
 		"build-ts": "tsc",
 		"tslint": "tslint -p tsconfig.json",

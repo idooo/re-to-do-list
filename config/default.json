@@ -13,5 +13,17 @@
 		"username": "test",
 		"password": "test",
 		"autoConnect": true
+	},
+	"auth": {
+		"jwtSecret": "secrettoken",
+		"successRedirectURL": "http://localhost:3000",
+		"providers": {
+			"auth0": {
+				"domain": "yourappdomain.auth0.com",
+				"clientID": "secretid",
+				"clientSecret": "secret",
+				"callbackURL": "http://localhost:8080/api/1.0/callback"
+			}
+		}
 	}
 }

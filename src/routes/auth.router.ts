@@ -10,7 +10,7 @@ export class AuthRouter extends AbstractRouter {
 	constructor(server: Server, private config: IConfig) {
 		super();
 
-		server.get('/login', passport.authenticate('auth0', {
+		server.get('/api/1.0/login', passport.authenticate('auth0', {
 				clientID: config.auth.providers.auth0.clientID,
 				domain: config.auth.providers.auth0.domain,
 				redirectUri: config.auth.providers.auth0.callbackURL,
@@ -22,7 +22,7 @@ export class AuthRouter extends AbstractRouter {
 		);
 
 		// Perform the final stage of authentication and redirect to '/user'
-		server.get('/callback', passport.authenticate('auth0', {
+		server.get('/api/1.0/callback', passport.authenticate('auth0', {
 				failureRedirect: '/',
 				session: false
 			}),
