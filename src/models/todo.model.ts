@@ -38,6 +38,11 @@ export class ToDoItem extends AbstractModel {
 				required: true,
 				ref: 'List'
 			},
+			priority: {
+				type: Number,
+				required: false,
+				default: 0
+			},
 			dateCode: {
 				type: String,
 				default: () => moment().format(TODO_DATE_CODE_FORMAT),

@@ -28,6 +28,10 @@ const IS_PAGE_VALIDATION = {
 	isInt: true,
 	optional: true
 };
+const IS_PRIORITY_VALIDATION = {
+	isInt: true,
+	optional: true
+};
 const IS_ID_VALIDATION = {
 	notEmpty: true,
 	isMongoId: true,
@@ -96,7 +100,7 @@ export class ToDoItemRouter extends AbstractRouter {
 					list,
 					this.model.ToDoItem.paginate({list: list._id}, {
 						page: req.params.page || 1,
-						sort: { _id: -1 },
+						sort: { priority: -1 },
 						limit: 50
 					})
 				]);
@@ -129,6 +133,9 @@ export class ToDoItemRouter extends AbstractRouter {
 					options: [4],
 					errorMessage: 'Invalid UUID'
 				}
+			},
+			priority: {
+				...IS_PRIORITY_VALIDATION
 			}
 		};
 
@@ -151,6 +158,7 @@ export class ToDoItemRouter extends AbstractRouter {
 					text: req.params.text,
 					list: list._id,
 					uuid: req.params.uuid || uuid.v4(),
+					priority: req.params.priority || 0,
 					dateCode: req.params.dateCode
 				});
 				return item.save();
@@ -180,6 +188,9 @@ export class ToDoItemRouter extends AbstractRouter {
 			text: {
 				optional: true,
 				...IS_LENGTH_VALIDATION
+			},
+			priority: {
+				...IS_PRIORITY_VALIDATION
 			}
 		};
 
@@ -201,6 +212,7 @@ export class ToDoItemRouter extends AbstractRouter {
 				const update = {};
 				if (req.params.status) update['status'] = req.params.status;
 				if (req.params.text) update['text'] = req.params.text;
+				if (!isNaN(req.params.priority)) update['priority'] = req.params.priority;
 				return this.model.ToDoItem.findOneAndUpdate(
 					{ _id: req.params.itemId },
 					update
