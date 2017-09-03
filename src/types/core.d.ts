@@ -4,7 +4,7 @@ interface IConfig {
 	server: {
 		host?: string;
 		port?: number;
-		catchUncaughtException?: false
+		catchUncaughtException?: false;
 	};
 	debug?: Object;
 	logs?: {
@@ -16,9 +16,9 @@ interface IConfig {
 		jwtSecret: string;
 		successRedirectURL: string;
 		providers: {
-			auth0: IAuth0Config
+			auth0: IAuth0Config;
 		};
-	}
+	};
 	database: IDatabaseConfig;
 }
 

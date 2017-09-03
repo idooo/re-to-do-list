@@ -2,7 +2,7 @@ import * as logger from 'winston';
 import { Database } from '../database';
 import { NotFoundError, ValidationError } from '../errors';
 import { IServer } from '../types/core';
-import { MongoError } from "mongodb";
+import { MongoError } from 'mongodb';
 
 
 export const INTERNAL_ERROR = 'INTERNAL_ERROR';

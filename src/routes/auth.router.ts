@@ -1,8 +1,8 @@
-import { AbstractRouter } from "./abstract.router";
+import { AbstractRouter } from './abstract.router';
 import * as jwt from 'jsonwebtoken';
 import * as passport from 'passport-restify';
-import { Server } from "restify";
-import { IConfig, IServer } from "../types/core";
+import { Server } from 'restify';
+import { IConfig, IServer } from '../types/core';
 
 
 export class AuthRouter extends AbstractRouter {

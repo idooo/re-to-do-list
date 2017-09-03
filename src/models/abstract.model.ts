@@ -1,7 +1,7 @@
 import * as logger from 'winston';
-import { Types } from "mongoose";
+import { Types } from 'mongoose';
 
-export function toObjectIdSanitiser (value) {
+export function toObjectIdSanitiser(value) {
 	try {
 		value = Types.ObjectId(value);
 	} catch (e) {

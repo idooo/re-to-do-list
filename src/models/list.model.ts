@@ -1,7 +1,6 @@
-import * as mongoose from 'mongoose'
+import * as mongoose from 'mongoose';
 import * as mongoosePaginate from 'mongoose-paginate';
 import { AbstractModel } from './abstract.model';
-
 
 export class ToDoList extends AbstractModel {
 	constructor() {

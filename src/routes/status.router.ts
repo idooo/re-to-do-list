@@ -1,5 +1,4 @@
 import { Server } from 'restify';
-import * as jwt from 'express-jwt';
 import { AbstractRouter } from './abstract.router';
 import { IConfig, IServer } from '../types/core';
 

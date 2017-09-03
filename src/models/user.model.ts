@@ -1,4 +1,4 @@
-import * as mongoose from 'mongoose'
+import * as mongoose from 'mongoose';
 import * as mongoosePaginate from 'mongoose-paginate';
 import * as uniqueValidator from 'mongoose-unique-validator';
 import { AbstractModel } from './abstract.model';

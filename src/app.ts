@@ -8,16 +8,15 @@ import { Winston } from 'winston';
 import { IConfig, IServer } from './types/core';
 import { LoggerInitialisation } from './logging';
 import { Database } from './database';
-import { Authentication } from "./auth";
-import { toObjectIdSanitiser } from "./models/abstract.model";
+import { Authentication } from './auth';
+import { toObjectIdSanitiser } from './models/abstract.model';
 
-import { INTERNAL_ERROR } from "./routes/abstract.router";
+import { INTERNAL_ERROR } from './routes/abstract.router';
 import { toDateCodeSanitiser, ToDoItemRouter } from './routes/item.router';
-import { StaticRouter } from "./routes/static.router";
+import { StaticRouter } from './routes/static.router';
 import { StatusRouter } from './routes/status.router';
 import { UserRouter } from './routes/users.router';
 import { AuthRouter } from './routes/auth.router';
-
 
 export class Application {
 	private config: IConfig;
@@ -93,7 +92,7 @@ export class Application {
 
 	setupWebServer() {
 		// Setup server
-		this.server.use(restify.plugins.bodyParser({mapParams: true}));
+		this.server.use(restify.plugins.bodyParser({ mapParams: true }));
 		this.server.use(
 			<any>expressValidator({
 				customValidators: this.customValidators,
@@ -105,10 +104,12 @@ export class Application {
 		// Global uncaughtException Error Handler
 		this.server.on(
 			'uncaughtException',
-			(req: IServer.Response,
-			 res: IServer.Response,
-			 route: Object,
-			 error: Error) => {
+			(
+				req: IServer.Response,
+				res: IServer.Response,
+				route: Object,
+				error: Error
+			) => {
 				this.logger.warn('uncaughtException', route, error.stack.toString());
 
 				res.send(500, {
@@ -121,7 +122,9 @@ export class Application {
 			(req: IServer.Request, res: IServer.Response, next: IServer.Next) => {
 				// Add debug logger for /api/ endpoints
 				if (/\/api\/.*/.test(req.url)) {
-					this.logger.debug(`${req.method} ${req.url} - auth: ${(req.user || {})._id}`);
+					this.logger.debug(
+						`${req.method} ${req.url} - auth: ${(req.user || {})._id}`
+					);
 				}
 				return next();
 			}
@@ -129,7 +132,7 @@ export class Application {
 
 		const cors = corsMiddleware({
 			origins: ['http://localhost:*'],
-			allowHeaders: ['Authorization'],
+			allowHeaders: ['Authorization']
 		});
 
 		this.server.pre(cors.preflight);

@@ -1,5 +1,5 @@
 import * as restify from 'restify';
-import * as path from "path";
+import * as path from 'path';
 
 export class StaticRouter {
 
