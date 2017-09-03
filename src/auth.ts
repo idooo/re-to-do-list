@@ -42,6 +42,7 @@ export class Authentication {
 			/^(?!\/api\/).*/,
 			{ method: 'OPTIONS' },
 			'/api/1.0/login',
+			'/api/1.0/status',
 			'/api/1.0/callback'
 		]}));
 	}

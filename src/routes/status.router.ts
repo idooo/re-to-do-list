@@ -8,7 +8,7 @@ const FIELDS_TO_MASK = ['password', 'database', 'auth'];
 export class StatusRouter extends AbstractRouter {
 	constructor(server: Server, private config: IConfig) {
 		super();
-		server.get('/api/1.0/status', jwt({secret: 'bW89XvUGiOSlczkykCO8dvR3ayNo7K1c0Js_V1BuY_ZT44eYmyMPxVr2qdvL3nbJ'}), this.routeStatus.bind(this));
+		server.get('/api/1.0/status', this.routeStatus.bind(this));
 	}
 
 	routeStatus(req: IServer.Request, res: IServer.Response) {
