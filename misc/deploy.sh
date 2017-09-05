@@ -31,7 +31,7 @@ ssh $HOST << EOF
   cd ~/todo
   yarn install --production
 
-  forever stop /var/www/todo/server.js
+  forever stop /var/www/todo/dist/server.js
 
   rm -rf /var/www/todo
   rsync -av ~/todo /var/www;
