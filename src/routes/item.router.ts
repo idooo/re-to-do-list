@@ -85,7 +85,6 @@ export class ToDoItemRouter extends AbstractRouter {
 			listId: {...IS_ID_VALIDATION}
 		});
 
-
 		this.validate(req)
 			.then(() => {
 				return this.model.ToDoList.findOne({
@@ -98,10 +97,14 @@ export class ToDoItemRouter extends AbstractRouter {
 
 				return Promise.all([
 					list,
-					this.model.ToDoItem.paginate({list: list._id}, {
+					this.model.ToDoItem.paginate({
+						list: list._id,
+						// get only records for the last month
+						dateCode: { $gte: moment().subtract(1, 'month').format(TODO_DATE_CODE_FORMAT) }
+					}, {
 						page: req.params.page || 1,
 						sort: { priority: -1 },
-						limit: 50
+						limit: 100
 					})
 				]);
 			})

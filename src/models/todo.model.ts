@@ -11,7 +11,7 @@ export const TODO_STATUS_TYPES = {
 	IN_PROGRESS: 'IN_PROGRESS'
 };
 
-export const TODO_DATE_CODE_FORMAT = 'DDMMYYYY';
+export const TODO_DATE_CODE_FORMAT = 'YYYYMMDD';
 
 export class ToDoItem extends AbstractModel {
 	constructor() {
