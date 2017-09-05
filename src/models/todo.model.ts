@@ -7,8 +7,8 @@ import * as moment from 'moment';
 export const TODO_STATUS_TYPES = {
 	DONE: 'DONE',
 	OPEN: 'OPEN',
-	ABANDON: 'ABANDON',
-	IN_PROGRESS: 'IN_PROGRESS'
+	MOVED: 'MOVED',
+	DELETED: 'DELETED'
 };
 
 export const TODO_DATE_CODE_FORMAT = 'YYYYMMDD';
