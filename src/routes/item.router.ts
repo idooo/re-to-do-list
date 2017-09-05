@@ -203,6 +203,8 @@ export class ToDoItemRouter extends AbstractRouter {
 		req.sanitizeParams('text').escape();
 		req.check(schema);
 
+		const update = {};
+
 		this.validate(req)
 			.then(() => {
 				return this.model.ToDoList.findOne({
@@ -212,7 +214,6 @@ export class ToDoItemRouter extends AbstractRouter {
 			})
 			.then(list => {
 				if (!list) throw new NotFoundError(`List ${req.params.listId} not found`);
-				const update = {};
 				if (req.params.status) update['status'] = req.params.status;
 				if (req.params.text) update['text'] = req.params.text;
 				if (!isNaN(req.params.priority)) update['priority'] = req.params.priority;
@@ -223,7 +224,7 @@ export class ToDoItemRouter extends AbstractRouter {
 			})
 			.then(item => {
 				if (!item) throw new NotFoundError(`Item ${req.params.itemId} not found`);
-				this.success(res, { item });
+				this.success(res, { item: {...item._doc, ...update} });
 				return next();
 			})
 			.catch(e => {
