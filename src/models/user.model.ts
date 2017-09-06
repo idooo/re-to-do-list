@@ -12,11 +12,6 @@ export class User extends AbstractModel {
 	constructor() {
 		super();
 		this.schema = new mongoose.Schema({
-			name: {
-				type: String,
-				trim: true,
-				unique: true
-			},
 			email: {
 				type: String,
 				trim: true,
