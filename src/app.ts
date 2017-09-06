@@ -15,7 +15,6 @@ import { INTERNAL_ERROR } from './routes/abstract.router';
 import { toDateCodeSanitiser, ToDoItemRouter } from './routes/item.router';
 import { StaticRouter } from './routes/static.router';
 import { StatusRouter } from './routes/status.router';
-import { UserRouter } from './routes/users.router';
 import { AuthRouter } from './routes/auth.router';
 
 export class Application {
@@ -76,7 +75,6 @@ export class Application {
 		new StaticRouter(this.server);
 		new AuthRouter(this.server, this.config);
 		new StatusRouter(this.server, this.config);
-		new UserRouter(this.server);
 		new ToDoItemRouter(this.server);
 	}
 
