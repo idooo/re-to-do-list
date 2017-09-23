@@ -104,7 +104,7 @@ export class ToDoItemRouter extends AbstractRouter {
 					}, {
 						page: req.params.page || 1,
 						sort: { priority: -1 },
-						limit: 100
+						limit: 200
 					})
 				]);
 			})
